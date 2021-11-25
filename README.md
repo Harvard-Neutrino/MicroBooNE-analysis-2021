@@ -1,4 +1,4 @@
-# MicroBooBE-analysis-2021
+# MicroBooNE-analysis-2021
 
  This code is provided as a supplement to [2111.10359](https://arxiv.org/abs/2111.10359). It is provided with no guarantee or warranty.
 
