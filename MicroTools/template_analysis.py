@@ -7,7 +7,7 @@ from pathlib import Path
 local_dir = Path(__file__).parent
 PATH_MCMC_CHAINS = f'{local_dir}/mcmc_results'
 
-from . import CERNInclusive as cern
+from . import inclusive
 from . import unfolder 
 from . import mcmc_signal
 from . import miniboone_fit as mbfit
@@ -98,7 +98,7 @@ class Templates():
         self.mub_signal_strength = np.sum(self.micro_templates, axis=1)/np.sum(self.micro_nominal)
 
         # MicroBoonE average neutrino energy
-        self.mub_avg_energy = np.matmul(self.micro_templates,cern.BinCenter*1e3)/np.sum(self.micro_nominal)
+        self.mub_avg_energy = np.matmul(self.micro_templates,inclusive.BinCenter*1e3)/np.sum(self.micro_nominal)
 
 
     def compute_chi2s(self):
@@ -116,7 +116,7 @@ class Templates():
         self.mub_chi2s = np.empty(0)
         for template in self.micro_templates:
             self.mub_x = np.append(self.mub_x, np.sum(template)/self.nominal_nevents)
-            self.mub_chi2s = np.append(self.mub_chi2s, cern.Chi2_Inclusive(template))
+            self.mub_chi2s = np.append(self.mub_chi2s, inclusive.Chi2_Inclusive(template))
 
         self.mb_delta_chi2s = self.mb_chi2s - np.min(self.mb_chi2s)
         self.mub_delta_chi2s = self.mub_chi2s - np.min(self.mub_chi2s)

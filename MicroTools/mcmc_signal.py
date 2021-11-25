@@ -22,7 +22,7 @@ from . import miniboone_fit as mbfit
 # if nb_dir not in sys.path:
 #     sys.path.append(path)
 
-from . import CERNInclusive as cern
+from . import inclusive
 from . import unfolder 
 
 # converter = oh.MBtomuB(analysis='1eX', remove_high_energy=False, unfold=True)
@@ -33,7 +33,7 @@ from . import unfolder
 #     for x in signal_strenghts:
 #         for template in muB_templates:
 #             template = x*template
-#             chi2s_signal_strengths = np.append(chi2s_signal_strengths, cern.Chi2_Inclusive(template))
+#             chi2s_signal_strengths = np.append(chi2s_signal_strengths, inclusive.Chi2_Inclusive(template))
 #     return signal_strenghts, np.reshape(chi2s_signal_strengths,  (Npoints_for_x, np.shape(muB_templates)[0]) ).T
 # micro_nominal_template = np.append(0.0, converter.miniToMicro(mbfit.mb_nominal_excess))
 # x_nominal, chi2_nominal = get_microboone_chi2s_in_x([micro_nominal_template], Npoints_for_x=100)
@@ -63,7 +63,7 @@ def GetLikelihood(parameters, background_model=False):
     # template = n_signal_vector
     # template[template<0] = 0 
     # mub_signal_vector = np.append(0.0, converter.miniToMicro(template))
-    # chi2_mub = cern.Chi2_Inclusive(mub_signal_vector)
+    # chi2_mub = inclusive.Chi2_Inclusive(mub_signal_vector)
 
     else:
          chi2_mb = mbfit.CalculateChi2SignalExpectations(parameters)

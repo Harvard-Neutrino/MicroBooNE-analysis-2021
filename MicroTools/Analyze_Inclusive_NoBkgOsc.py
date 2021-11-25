@@ -7,11 +7,11 @@
 '''
 
 import numpy as np
-import ohioState as GoBlue
+import unfolder
 RHE = False
-GBPC = GoBlue.MBtomuB(analysis='1eX_PC', remove_high_energy=RHE, unfold=True)
-GBFC = GoBlue.MBtomuB(analysis='1eX', remove_high_energy=RHE, unfold=True)
-from CERN_Inclusive_Analysis import muB_NoBkgOsc_Chi2
+GBPC = unfolder.MBtomuB(analysis='1eX_PC', remove_high_energy=RHE, unfold=True)
+GBFC = unfolder.MBtomuB(analysis='1eX', remove_high_energy=RHE, unfold=True)
+from Inclusive_Analysis import muB_NoBkgOsc_Chi2
 from pathlib import Path
 local_dir = str(Path(__file__).parent)
 import os

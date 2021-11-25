@@ -1,14 +1,14 @@
 import numpy as np
-import ohioState as GoBlue
+import unfolder
 from multiprocessing import Pool, Value, Lock
 import itertools
 import os
 RHE = False
 UFMB = False
-GBPC = GoBlue.MBtomuB(analysis='1eX_PC', remove_high_energy=RHE, unfold=UFMB, effNoUnfold=True)
-GBFC = GoBlue.MBtomuB(analysis='1eX', remove_high_energy=RHE, unfold=UFMB, effNoUnfold=True)
+GBPC = unfolder.MBtomuB(analysis='1eX_PC', remove_high_energy=RHE, unfold=UFMB, effNoUnfold=True)
+GBFC = unfolder.MBtomuB(analysis='1eX', remove_high_energy=RHE, unfold=UFMB, effNoUnfold=True)
 
-from CERN_Inclusive_Analysis import muB_OscChi2, PmmAvg, MuBNuEDis, MuBNuMuDis
+from Inclusive_Analysis import muB_OscChi2, PmmAvg, MuBNuEDis, MuBNuMuDis
 from pathlib import Path
 local_dir = str(Path(__file__).parent)
 

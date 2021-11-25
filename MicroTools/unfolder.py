@@ -10,7 +10,7 @@ local_dir = Path(__file__).parent
 DatDir = f"{local_dir}/muB_data/"
 
 class MBtomuB:
-    def __init__(self, analysis='1eX', remove_high_energy=False, unfold=True):
+    def __init__(self, analysis='1eX', remove_high_energy=False, unfold=True, effNoUnfold=False):
         """This class converts an excess in MiniBooNE 2018 to the corresponding signal in MicroBooNE
         
            Parameters:
@@ -21,11 +21,16 @@ class MBtomuB:
            unfold             ---- Perform unfolding? If True, the input to miniToMicro must be the number of events 
                                    *as a function of reconstructed neutrino energy*. If False, the input must be the 
                                    number of events *as a function of true neutrino energy*
+           effNoUnfold        ---- ***Only relevant if unfold=False***
+                                   Does the input include MiniBooNE efficiencies? If True, the input to miniToMicro
+                                   must be the number of events after MiniBooNE efficiencies. If False, the input
+                                   must be the number of events before MiniBooNE efficiencies.
         """
         if analysis not in ['1eX', '1eX_PC', 'CCQE']:
             raise NotImplementedError("The analysis "+analysis+" is not among the implemented analyses: [1eX, 1eX_PC, CCQE]")
         self._remove_high_energy = remove_high_energy
         self._unfold = unfold
+        self._effnounfold = effNoUnfold
             
         ## Set up data needed for unfolding ##
         self._migration = np.loadtxt(f"{DatDir}Migration_matrix_paper_bins.dat") # MiniBooNE migration matrix
@@ -112,6 +117,8 @@ class MBtomuB:
             u = np.where(u<0, 0, u) # If the excess is negative, set it to 0
         else:
             u = mini_nue
+            if self._effnounfold:
+                u /= self.MB_eff
             
         ## Transform to MicroBooNE ##
         # Set to 0 everything above 800 MeV?

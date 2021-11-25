@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.linalg import inv
 from scipy.special import sici
-import ohioState as Buckeyes
+import unfolder
 
-GBPC_NuE = Buckeyes.MBtomuB(analysis='1eX_PC', remove_high_energy=False, unfold=False, effNoUnfold=False)
-GBFC_NuE = Buckeyes.MBtomuB(analysis='1eX', remove_high_energy=False, unfold=False, effNoUnfold=False)
+GBPC_NuE = unfolder.MBtomuB(analysis='1eX_PC', remove_high_energy=False, unfold=False, effNoUnfold=False)
+GBFC_NuE = unfolder.MBtomuB(analysis='1eX', remove_high_energy=False, unfold=False, effNoUnfold=False)
 
 # Pointing to the right path of datafile
 from pathlib import Path
