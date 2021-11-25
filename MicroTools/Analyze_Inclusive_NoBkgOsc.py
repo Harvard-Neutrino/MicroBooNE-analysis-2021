@@ -1,3 +1,11 @@
+'''
+    This Python Script loads in a set of parameters {\Delta m_{41}^2, \sin^2(2\theta_{\mu e})} along with a set of MiniBooNE-excess-spectra for those parameters
+    and then determines various MicroBooNE test statistics:
+    a) Asimov Expectation when using the full Covariance Matrix
+    b) Asimov Expectation using the Constrained Covariance Approach
+    c) Data Result using the full Covariance Matrix
+'''
+
 import numpy as np
 import ohioState as GoBlue
 RHE = False
@@ -6,9 +14,10 @@ GBFC = GoBlue.MBtomuB(analysis='1eX', remove_high_energy=RHE, unfold=True)
 from CERN_Inclusive_Analysis import muB_NoBkgOsc_Chi2
 from pathlib import Path
 local_dir = str(Path(__file__).parent)
+import os
 
 MiniBooNE_Signal_PANM = np.loadtxt(local_dir+"/MiniBooNETables/dm-sin-MB-events-table-less-points.dat")
-KKResult = []
+Result = []
 Pairs = []
 for k0 in range(len(MiniBooNE_Signal_PANM)):
     if k0 % 100 == 0:
@@ -31,6 +40,6 @@ for k0 in range(len(MiniBooNE_Signal_PANM)):
 
     uBtemp = np.concatenate([uBFC, uBPC, np.zeros(85)])
 
-    KKResult.append([dm41, ssq2thmue, muB_NoBkgOsc_Chi2(uBtemp, constrained=False, Asimov=True), muB_NoBkgOsc_Chi2(uBtemp, constrained=True, Asimov=True), muB_NoBkgOsc_Chi2(uBtemp, constrained=False, Asimov=False)])
+    Result.append([dm41, ssq2thmue, muB_NoBkgOsc_Chi2(uBtemp, constrained=False, Asimov=True), muB_NoBkgOsc_Chi2(uBtemp, constrained=True, Asimov=True), muB_NoBkgOsc_Chi2(uBtemp, constrained=False, Asimov=False)])
 
-np.savetxt(local_dir+"/NoBkgOsc_Plots/Inclusive_NoBkgOsc_Chi2.dat", KKResult)
+np.savetxt(os.path.join(os.path.dirname(__file__), '../plots/Fig3/Inclusive_NoBkgOsc_Chi2.dat'), Result)
