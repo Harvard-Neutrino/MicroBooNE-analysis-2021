@@ -3,30 +3,20 @@ from scipy.linalg import inv
 from scipy.optimize import minimize
 import os
 
+from MicroTools import *
 
-# Pointing to the right path of datafile
-from pathlib import Path
-local_dir = Path(__file__).parent
-DatDir = f"{local_dir}/InclusiveData"
-BkgVec = np.load(f"{DatDir}/TotalBackground.npy") #Expected total background rate in the inclusive channel, 25 bins between 0 and 2.5 GeV
-LEEVec = np.load(f"{DatDir}/LEE_x1_Expectation.npy") #Expected Low-Energy-Excess rate (full strength) in the inclusive channel, 25 bins between 0 and 2.5 GeV
-DatVec = np.load(f"{DatDir}/ObservedData.npy") #Observed inclusive-channel data, 25 bins between 0 and 2.5 GeV
-SigCorr = np.load(f"{DatDir}/SigCorr_PD.npy") #Correlation matrix amongst [25, 25] signal bins
+BkgVec = np.load(f"{muB_inclusive_data_path}/TotalBackground.npy") #Expected total background rate in the inclusive channel, 25 bins between 0 and 2.5 GeV
+LEEVec = np.load(f"{muB_inclusive_data_path}/LEE_x1_Expectation.npy") #Expected Low-Energy-Excess rate (full strength) in the inclusive channel, 25 bins between 0 and 2.5 GeV
+DatVec = np.load(f"{muB_inclusive_data_path}/ObservedData.npy") #Observed inclusive-channel data, 25 bins between 0 and 2.5 GeV
+SigCorr = np.load(f"{muB_inclusive_data_path}/SigCorr_PD.npy") #Correlation matrix amongst [25, 25] signal bins
+
+for kk in range(25):
+    SigCorr[kk][kk] = 1.0
+PoC_Uncertainty = np.load(f"{muB_inclusive_data_path}/PostConstraint_Uncertainty.npy") #Diagonal uncertainty ratio after applying background-channel constraints
 
 BinEdge = np.linspace(0, 2.5, 26)
 BinCenter = (BinEdge[:-1] + BinEdge[1:])/2
 BinWidth = (BinEdge[1:] - BinEdge[:-1])
-
-# DatDir = "/Users/kjkelly/Dropbox/ResearchProjects/muBExcess/GH/uBvsmB/PyModules/InclusiveData/"
-# os.chdir(DatDir)
-# BkgVec = np.load("TotalBackground.npy") #Expected total background rate in the inclusive channel, 25 bins between 0 and 2.5 GeV
-# LEEVec = np.load("LEE_x1_Expectation.npy") #Expected Low-Energy-Excess rate (full strength) in the inclusive channel, 25 bins between 0 and 2.5 GeV
-# DatVec = np.load("ObservedData.npy") #Observed inclusive-channel data, 25 bins between 0 and 2.5 GeV
-# SigCorr = np.load("SigCorr_PD.npy") #Correlation matrix amongst [25, 25] signal bins
-
-for kk in range(25):
-    SigCorr[kk][kk] = 1.0
-PoC_Uncertainty = np.load(f"{DatDir}/PostConstraint_Uncertainty.npy") #Diagonal uncertainty ratio after applying background-channel constraints
 
 def CNPStat(ni, mi):
     """Combined Neyman-Pearson Statistical Uncertainty

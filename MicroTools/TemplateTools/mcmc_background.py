@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('Agg')
 import numpy as np
 import emcee
 import sys
@@ -8,37 +6,8 @@ import time
 import argparse
 import scipy.stats as stats
 
-from . import miniboone_neutrino_improved_fit as mbfit
-#import . miniboone_neutrino_improved_fit as mbfit
-
-#parser = argparse.ArgumentParser()
-
-#parser.add_argument('-t',
-#		dest='threads',
-#		type=int, 
-#		default=6,
-#		help='Cores'
-#		   )
-#parser.add_argument('-w',
-#		dest='walkers',
-#		type=int, 
-#		default=50,
-#		help='Number of Walkers'
-#		   )
-#parser.add_argument('-b',
-#		dest='burnin',
-#		type=int, 
-#		default=20000,
-#		help='Burnin steps'
-#		   )
-#parser.add_argument('-s',
-#		dest='steps',
-#		type=int, 
-#		default=50000,
-#		help='MCMC steps'
-#		   )
-
-#args = parser.parse_args()
+from MicroTools import *
+from MicroTools import miniboone_fit as mbfit
 
 number_of_backgrounds = 3
 number_of_bins = 11

@@ -2,23 +2,20 @@ import os
 import sys
 import numpy as np
 import scipy
-from pathlib import Path
 
-local_dir = Path(__file__).parent
-PATH_MCMC_CHAINS = f'{local_dir}/mcmc_results'
-
-from . import inclusive
-from . import unfolder 
-from . import mcmc_signal
-from . import miniboone_fit as mbfit
+from MicroTools import *
+from MicroTools import unfolder 
+from MicroTools.InclusiveTools import inclusive
+from MicroTools.TemplateTools import mcmc_signal
+from MicroTools.TemplateTools import miniboone_fit as mbfit
 
 '''
 Templates
 
-   This class stands for a given case of template analysis.
+   This class handles the template analysis for a given MCMC run
         
-        case: "signal" or "background", depending on how 
-        one wants to generate new templates. 
+        case: may be "signal" or "background", depending on whether the MCMC
+        was run with mcmc_signal or mcmc_background 
         
         nbins: how many bins to vary wrt nominal template (starting from lowest energy)
         

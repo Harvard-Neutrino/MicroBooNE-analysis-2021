@@ -2,26 +2,8 @@ import pickle
 import numpy as np
 import scipy as sp
 import scipy.interpolate as interpolate
-import sys
-from pathlib import Path
-local_dir = Path(__file__).parent
-datapath = f"{local_dir}/MB_data/data_release_2018"
 
-MeVToGeV = 1.0e-3
-#################################### BEGIN LOAD MINIBOONE FILES ######################################
-# reco neutrino energy, true neutrino energy, neutrino beampipe, and event weight
-mb_mc_data_release = np.genfromtxt(datapath + "/miniboone_numunuefullosc_ntuple.txt")
-bin_edges = np.genfromtxt(datapath + "/miniboone_binboundaries_nue_lowe.txt")
-bin_centers = bin_edges[:-1] + np.diff(bin_edges)/2.
-bin_width = np.diff(bin_edges)
-mb_nue_analysis_data = np.genfromtxt(datapath + "/miniboone_nuedata_lowe.txt")
-mb_numu_analyis_data = np.genfromtxt(datapath + "/miniboone_numudata.txt")
-mb_nue_analysis_predicted_background = np.genfromtxt(datapath + "/miniboone_nuebgr_lowe.txt")
-mb_numu_analyis_prediction = np.genfromtxt(datapath + "/miniboone_numu.txt")
-fractional_covariance_matrix = np.genfromtxt(datapath + "/miniboone_full_fractcovmatrix_nu_lowe.txt")
-
-#################################### END LOAD MINIBOONE FILES ######################################
-
+from MicroTools import *
 
 #################################### BEGIN MINIBOONE ANALYSIS ######################################
 

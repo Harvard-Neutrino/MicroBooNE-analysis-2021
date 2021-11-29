@@ -1,5 +1,3 @@
-import os
-import sys
 import matplotlib
 import matplotlib.pyplot as plt
 import corner
@@ -9,11 +7,12 @@ import emcee
 import sys
 import tqdm
 import time
-from pathlib import Path
-from scipy.interpolate import interp1d
 
-local_dir = Path(__file__).parent
-from . import miniboone_fit as mbfit
+
+from MicroTools import *
+from MicroTools.TemplateTools import miniboone_fit as mbfit
+from MicroTools.InclusiveTools import inclusive
+from MicroTools import unfolder 
 
 # ##############################
 # # IMPORT IVAN/YUBER AND KEVIN
@@ -21,9 +20,6 @@ from . import miniboone_fit as mbfit
 # nb_dir = os.path.split(os.getcwd())[0]
 # if nb_dir not in sys.path:
 #     sys.path.append(path)
-
-from . import inclusive
-from . import unfolder 
 
 # converter = oh.MBtomuB(analysis='1eX', remove_high_energy=False, unfold=True)
 # def get_microboone_chi2s_in_x(muB_templates, Npoints_for_x=10):
@@ -37,6 +33,7 @@ from . import unfolder
 #     return signal_strenghts, np.reshape(chi2s_signal_strengths,  (Npoints_for_x, np.shape(muB_templates)[0]) ).T
 # micro_nominal_template = np.append(0.0, converter.miniToMicro(mbfit.mb_nominal_excess))
 # x_nominal, chi2_nominal = get_microboone_chi2s_in_x([micro_nominal_template], Npoints_for_x=100)
+# from scipy.interpolate import interp1d
 # f = interp1d(x_nominal, chi2_nominal[0])
 
 NEVENTS_NOMINAL = 360
@@ -164,7 +161,7 @@ def run_mcmc(nwalkers=50,
         else:
             appendix='free'
     
-    np.savetxt(f"{local_dir}/mcmc_results/miniboone_signal_chain_{nbins}_bins_{appendix}.dat", complete_templates)
+    np.savetxt(f"{PATH_MCMC_CHAINS}/miniboone_signal_chain_{nbins}_bins_{appendix}.dat", complete_templates)
 
     # labels=[f'{mbfit.bin_edges[i]} MeV - {mbfit.bin_edges[i+1]} MeV' for i in range(nbins)]
     labels=[f'bin {i}' for i in range(nbins)]
@@ -172,7 +169,7 @@ def run_mcmc(nwalkers=50,
     fig = corner.corner(samples, show_titles=True,  plot_datapoints=False,
                                 title_kwargs={"fontsize": 11}, 
                                 smooth=True,labels=labels)
-    fig.savefig(f"{local_dir}/mcmc_results/miniboone_signal_triangle_{nbins}_bins.png")
+    fig.savefig(f"{PATH_MCMC_CHAINS}/miniboone_signal_triangle_{nbins}_bins.png")
     plt.close()
 
     return sampler

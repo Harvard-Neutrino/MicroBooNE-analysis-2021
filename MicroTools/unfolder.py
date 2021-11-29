@@ -1,13 +1,8 @@
 import numpy as np
 import scipy.special as spec
 import scipy.integrate as integ
-from pathlib import Path
-local_dir = Path(__file__).parent
 
-# Pointing to the right path of datafile
-from pathlib import Path
-local_dir = Path(__file__).parent
-DatDir = f"{local_dir}/muB_data/"
+from MicroTools import *
 
 class MBtomuB:
     def __init__(self, analysis='1eX', remove_high_energy=False, unfold=True, effNoUnfold=False):
@@ -33,9 +28,9 @@ class MBtomuB:
         self._effnounfold = effNoUnfold
             
         ## Set up data needed for unfolding ##
-        self._migration = np.loadtxt(f"{DatDir}Migration_matrix_paper_bins.dat") # MiniBooNE migration matrix
+        self._migration = np.loadtxt(f"{path_unfolding_data}Migration_matrix_paper_bins.dat") # MiniBooNE migration matrix
         self.MB_eff = np.sum(self._migration, axis=0)
-        self._MB_MC = np.loadtxt(f"{DatDir}MC_truth.dat") # MiniBooNE nu_e background. To be used as a prior for unfolding
+        self._MB_MC = np.loadtxt(f"{path_unfolding_data}MC_truth.dat") # MiniBooNE nu_e background. To be used as a prior for unfolding
 
         
         self._bin_edges_rec_MB = np.array([200,  300,  375,  475,  550,  675,  800,  950,  1100,  1250,  1500,  3000]) # MiniBooNE bin edges [MeV]
@@ -62,7 +57,7 @@ class MBtomuB:
             self._bin_edges_rec_microB = np.linspace(200, 1200, 11)
             self._fudge = np.ones(len(self._bin_edges_rec_microB)-1) # No fudge factors here! :-)
 
-            self._smearing_matrix_microB = np.loadtxt(f"{DatDir}Migration_CCQE.dat")
+            self._smearing_matrix_microB = np.loadtxt(f"{path_unfolding_data}Migration_CCQE.dat")
 
         elif analysis=='1eX':
             self._relative_exposure = 6.369/12.84 # 6.369 POT [MicroBooNE] vs vs 6.46e20 POT [MiniBooNE 2012]
@@ -76,7 +71,7 @@ class MBtomuB:
                                     0.28308206, 0.27329645, 0.27794804, 0.28826545, 0.29780453, 0.29065536,
                                     0.29850116, 0.29434252, 0.29046458, 0.29612374, 0.28790173, 0.28431594,
                                     0.27852108, 0.27849889, 0.26675044, 0.25958135, 0.2632961, 0.25717796])
-            self._smearing_matrix_microB = np.loadtxt(f"{DatDir}Migration_1eX.dat")
+            self._smearing_matrix_microB = np.loadtxt(f"{path_unfolding_data}Migration_1eX.dat")
         elif analysis=='1eX_PC':
             self._relative_exposure = 6.369/12.84 # 6.369 POT [MicroBooNE] vs vs 6.46e20 POT [MiniBooNE 2012]
             # Efficiency as obtained by comparing Fig. 1 in arXiv:2110.13978 with their migration matrix binned in true energy
@@ -88,7 +83,7 @@ class MBtomuB:
                                     0.28861726, 0.2792527, 0.30009332, 0.30262111, 0.29996619, 0.30985736,
                                     0.30009521, 0.27908594, 0.30160061, 0.30353468, 0.29630258, 0.29723266,
                                     0.29916651, 0.30065366, 0.30708662, 0.31920767, 0.32554718, 0.33372028])
-            self._smearing_matrix_microB = np.loadtxt(f"{DatDir}Migration_1eX_PC.dat")            
+            self._smearing_matrix_microB = np.loadtxt(f"{path_unfolding_data}Migration_1eX_PC.dat")            
 
     def miniToMicro(self, mini_nue):
         """Convert excess in MiniBooNE 2018 to the corresponding signal in MicroBooNE

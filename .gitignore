@@ -1,5 +1,5 @@
 # Large MCMC files
-MicroTools/mcmc_results/*
+MicroTools/TemplateTools/mcmc_results/*
 
 # Mac files
 .DS_Store
