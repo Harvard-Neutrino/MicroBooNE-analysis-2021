@@ -52,7 +52,13 @@ class Templates():
     '''
     def generate_templates(self):
 
-        mcmc_signal.run_mcmc(nwalkers=50, nsteps=3000, threads=4, burnin_steps=2000, nbins=self.nbins, appendix=name)
+        mcmc_signal.run_mcmc(nwalkers=50, 
+                            nsteps=3000, 
+                            threads=4, 
+                            burnin_steps=2000, 
+                            nbins=self.nbins, 
+                            model='signal',
+                            appendix=name)
 
 
     # load the templates produced from MCMC
