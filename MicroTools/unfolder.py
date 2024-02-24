@@ -1,13 +1,12 @@
 import numpy as np
-import scipy.special as spec
-import scipy.integrate as integ
-
-from MicroTools import *
+import MicroTools as mt
+from . import antinu_tools
 
 class MBtomuB:
-    def __init__(self, analysis='1eX', remove_high_energy=False, unfold=True, effNoUnfold=False):
+    def __init__(self, analysis='1eX', remove_high_energy=False, unfold=True, effNoUnfold=False, \
+                        nubar_fraction=0.0, generator='GENIE_v3_02_00'):
         """This class converts an excess in MiniBooNE 2018 to the corresponding signal in MicroBooNE
-        
+
            Parameters:
            analysis           ---- MicroBooNE analysis. Possible values are '1eX' [inclusive, fully containted], 
                                    '1eX_PC' [inclusive, partially contained], 'CCQE' [1e1p quasielastic]
@@ -20,29 +19,55 @@ class MBtomuB:
                                    Does the input include MiniBooNE efficiencies? If True, the input to miniToMicro
                                    must be the number of events after MiniBooNE efficiencies. If False, the input
                                    must be the number of events before MiniBooNE efficiencies.
+            nubar_fraction    ---- unfold assuming that the MiniBooNE excess has a fraction `nubar_fraction` of 
+                                    the total number of events in antineutrinos (n.b. 0<nubar_fraction< 1)
+            generator         ---- use data from what generator to reweigh.
+
         """
-        if analysis not in ['1eX', '1eX_PC', 'CCQE']:
+        if analysis not in ['1eX', '1eX_PC', 'CCQE', '1eX0p', '1eXNp']:
             raise NotImplementedError("The analysis "+analysis+" is not among the implemented analyses: [1eX, 1eX_PC, CCQE]")
         self._remove_high_energy = remove_high_energy
         self._unfold = unfold
         self._effnounfold = effNoUnfold
-            
-        ## Set up data needed for unfolding ##
-        self._migration = np.loadtxt(f"{path_unfolding_data}Migration_matrix_paper_bins.dat") # MiniBooNE migration matrix
-        self.MB_eff = np.sum(self._migration, axis=0)
-        self._MB_MC = np.loadtxt(f"{path_unfolding_data}MC_truth.dat") # MiniBooNE nu_e background. To be used as a prior for unfolding
-
+        self._analysis = analysis
+        self._nubar_fraction = nubar_fraction
         
+
+        if np.abs(self._nubar_fraction) > 0:
+            self.nubar_correction_MB = antinu_tools.get_reweighter_nu_to_antinu_Enu_1D(generator=generator, experiment='miniboone')
+            self.nubar_correction_microB = antinu_tools.get_reweighter_nu_to_antinu_Enu_1D(generator=generator, experiment='microboone')
+
+        else:
+            # do not reweight
+            self.nubar_correction_MB = lambda x: 1
+            self.nubar_correction_microB = lambda x: 1
+
+        ## Set up data needed for unfolding ##
+        self._MB_MC = np.loadtxt(f"{mt.path_unfolding_data}MC_truth.dat") # MiniBooNE nu_e background. To be used as a prior for unfolding
+        self._MB_MC_technote = np.loadtxt('MicroTools/muB_data/unfolding_data/nue_intrinsic.dat')
+
+        # neutrino migration matrix
+        self._migration = np.loadtxt(f"{mt.path_unfolding_data}MiniBooNE_migration_matrix_paper_bins.dat") # MiniBooNE migration matrix
+        self.MB_eff = np.sum(self._migration, axis=0)
+
+        # antineutrino migration matrix
+        self._nubar_migration = np.loadtxt(f"{mt.path_unfolding_data}our_antinu_MiniBooNE_migration_matrix.dat") # MiniBooNE migration matrix
+        self.nubar_MB_eff = self.MB_eff # np.sum(self._nubar_migration, axis=0)
+
+        # MiniBooNE True and Reco bins
         self._bin_edges_rec_MB = np.array([200,  300,  375,  475,  550,  675,  800,  950,  1100,  1250,  1500,  3000]) # MiniBooNE bin edges [MeV]
         self._bin_edges_true = np.array([200, 250, 300, 350, 400, 450, 500, 600, 800, 1000, 1500, 2000, 2500, 3000]) # Bin edges after unfolding [MeV]
-        
+
         self._bin_widths_rec_MB = np.diff(self._bin_edges_rec_MB)
         self._bin_widths_true = np.diff(self._bin_edges_true)
+
+        self._bin_centers_rec_MB = (self._bin_edges_rec_MB[1:] + self._bin_edges_rec_MB[:-1])/2
         self._bin_centers_true = (self._bin_edges_true[1:] + self._bin_edges_true[:-1])/2
-        
-        ## Set up MicroBooNE parameters ##
+
+        # relative target mass
         self._relative_targets = 85 / 818 # 85 ton [MicroBooNE] vs 818 ton [MiniBooNE]
 
+        ## MicroBooNE parameters
         # Efficiency, energy bins, energy resolution, and fudge efficiency
         if analysis=='CCQE':
             self._relative_exposure = 6.67/12.84 # 6.67e20 POT [MicroBooNE] vs 12.84e20 POT [MiniBooNE 2018]
@@ -57,7 +82,7 @@ class MBtomuB:
             self._bin_edges_rec_microB = np.linspace(200, 1200, 11)
             self._fudge = np.ones(len(self._bin_edges_rec_microB)-1) # No fudge factors here! :-)
 
-            self._smearing_matrix_microB = np.loadtxt(f"{path_unfolding_data}Migration_CCQE.dat")
+            self._smearing_matrix_microB = np.loadtxt(f"{mt.path_unfolding_data}Migration_CCQE.dat")
 
         elif analysis=='1eX':
             self._relative_exposure = 6.369/12.84 # 6.369 POT [MicroBooNE] vs vs 6.46e20 POT [MiniBooNE 2012]
@@ -71,7 +96,8 @@ class MBtomuB:
                                     0.28308206, 0.27329645, 0.27794804, 0.28826545, 0.29780453, 0.29065536,
                                     0.29850116, 0.29434252, 0.29046458, 0.29612374, 0.28790173, 0.28431594,
                                     0.27852108, 0.27849889, 0.26675044, 0.25958135, 0.2632961, 0.25717796])
-            self._smearing_matrix_microB = np.loadtxt(f"{path_unfolding_data}Migration_1eX.dat")
+            self._smearing_matrix_microB = np.loadtxt(f"{mt.path_unfolding_data}Migration_1eX.dat")
+
         elif analysis=='1eX_PC':
             self._relative_exposure = 6.369/12.84 # 6.369 POT [MicroBooNE] vs vs 6.46e20 POT [MiniBooNE 2012]
             # Efficiency as obtained by comparing Fig. 1 in arXiv:2110.13978 with their migration matrix binned in true energy
@@ -83,8 +109,53 @@ class MBtomuB:
                                     0.28861726, 0.2792527, 0.30009332, 0.30262111, 0.29996619, 0.30985736,
                                     0.30009521, 0.27908594, 0.30160061, 0.30353468, 0.29630258, 0.29723266,
                                     0.29916651, 0.30065366, 0.30708662, 0.31920767, 0.32554718, 0.33372028])
-            self._smearing_matrix_microB = np.loadtxt(f"{path_unfolding_data}Migration_1eX_PC.dat")            
+            self._smearing_matrix_microB = np.loadtxt(f"{mt.path_unfolding_data}Migration_1eX_PC.dat")            
 
+        elif analysis=='1eX0p':
+            self._relative_exposure = 6.369/12.84 # 6.369 POT [MicroBooNE] vs vs 6.46e20 POT [MiniBooNE 2012]
+            
+            self._efficiency = np.array([0.50314466, 0.54882715, 0.64019214, 0.72976845, 0.81755608, 0.90826832,
+                                         1.04872359, 1.15368084, 1.22829937, 1.21671845, 1.18336647, 1.03151614,
+                                         0.90760706])
+
+            self._bin_edges_rec_microB = np.linspace(100, 2500, 25)
+            self._fudge = np.array([0.24356887, 0.24804412, 0.25286889, 0.25622915, 0.26522795, 0.28182341,
+                                    0.28308206, 0.27329645, 0.27794804, 0.28826545, 0.29780453, 0.29065536,
+                                    0.29850116, 0.29434252, 0.29046458, 0.29612374, 0.28790173, 0.28431594,
+                                    0.27852108, 0.27849889, 0.26675044, 0.25958135, 0.2632961, 0.25717796])
+            self._smearing_matrix_microB = np.loadtxt(f"{mt.path_unfolding_data}Migration_1eX.dat")
+            self._nubar_smearing_matrix_microB = np.loadtxt(f"{mt.path_unfolding_data}our_antinu_Migration_1eX.dat")
+
+    def unfold(self, mini_nue, nubar=False, n_iter = 3):
+
+        if not nubar:
+            # Use D'Agostini's method to unfold the MiniBooNE excess to true neutrino energy
+            u_nu = self._MB_MC * self._bin_widths_true
+            for _ in range(n_iter):
+                A_times_u = np.multiply(self._migration, u_nu)
+                M = np.multiply(A_times_u.T, 1/np.sum(A_times_u, axis=1)).T
+                M = np.multiply(M, 1/self.MB_eff)
+                u_nu = np.matmul(M.T, mini_nue)
+            
+            # u = np.where(u_nu < 0, 0, u_nu) # If the excess is negative, set it to 0
+        else:
+            # Use D'Agostini's method to unfold the MiniBooNE excess to true antineutrino energy
+            # u_nubar = self._MB_MC * self._bin_widths_true  / self.nubar_correction_MB(self._bin_centers_true)
+            u_nubar = self._MB_MC/self._MB_MC
+            for _ in range(n_iter):
+                A_times_u = np.multiply(self._nubar_migration[:-2,:], u_nubar)
+                M = np.multiply(A_times_u.T, 1/np.sum(A_times_u, axis=1)).T
+                M = np.multiply(M, 1/self.nubar_MB_eff)
+                u_nubar = np.matmul(M.T, mini_nue)
+
+            # u = np.where(u_nubar < 0, 0, u_nubar) # If the excess is negative, set it to 0
+        
+        # Set to 0 everything above 800 MeV?
+        if self._remove_high_energy:
+            u[8:] *= 0
+        
+        return u
+    
     def miniToMicro(self, mini_nue):
         """Convert excess in MiniBooNE 2018 to the corresponding signal in MicroBooNE
            If unfold was set to True:
@@ -100,33 +171,52 @@ class MBtomuB:
            To see the MicroBooNE bin edges used for the output, check the member variable _bin_edges_rec_microB
         """
 
-        if(self._unfold):
-            # Use D'Agostini's method to unfold the MiniBooNE excess to true neutrino energy
-            u = self._MB_MC * self._bin_widths_true
-            for i in range(3):
-                A_times_u = np.multiply(self._migration, u)
-                M = np.multiply(A_times_u.T, 1/np.sum(A_times_u, axis=1)).T
-                M = np.multiply(M, 1/self.MB_eff)
-                u = np.matmul(M.T, mini_nue)
+        if (self._unfold):
+            u_nu = self.unfold(mini_nue, nubar=False)
+            if self._nubar_fraction > 0.0:
+                u_nubar = self.unfold(mini_nue, nubar=True)
+            else:
+                u_nubar = u_nu * 0
 
-            u = np.where(u<0, 0, u) # If the excess is negative, set it to 0
         else:
-            u = mini_nue
+            u_nu = mini_nue
             if self._effnounfold:
-                u /= self.MB_eff
-            
+                u_nu /= self.MB_eff
+
         ## Transform to MicroBooNE ##
-        # Set to 0 everything above 800 MeV?
-        if self._remove_high_energy:
-            u[8:] = 0
-            
+
         # Multiply by the relative exposure, number of targets, and efficiency
-        u *= self._relative_exposure * self._relative_targets * self._efficiency
+        nu_flux = u_nu
+        nubar_flux = u_nubar
+        
+        # reweight antineutrino flux
+        nubar_flux *= self.nubar_correction_microB(self._bin_centers_true)
+
+        # normalization
+        norm = self._relative_exposure * self._relative_targets * self._efficiency
+        nu_flux *= norm
+        nubar_flux *= norm
 
         # Smear in energy
-        u = np.matmul(self._smearing_matrix_microB, u)
+        nu_flux_microB = np.matmul(self._smearing_matrix_microB, nu_flux)
 
         # Introduce the fudge factors
-        u *= self._fudge
+        u_nu = nu_flux_microB * self._fudge
+
+        if self._nubar_fraction:
+            # nubar_flux_microB = np.matmul(self._nubar_smearing_matrix_microB, nubar_flux)
+            nubar_flux_microB = np.matmul(self._smearing_matrix_microB, nubar_flux)
+            u_nubar = nubar_flux_microB * self._fudge
+
+
+        # fill in the first bin
+        if '1eX' in self._analysis:
+            u_nu = np.append(0,u_nu) 
+            u_nubar = np.append(0,u_nubar)
+        
+        if self._nubar_fraction:
+            u = u_nu * (1 - self._nubar_fraction) + u_nubar * self._nubar_fraction
+        else:
+            u = u_nu
 
         return u

@@ -8,16 +8,16 @@
 
 import numpy as np
 
-from MicroTools import * 
+import MicroTools as MT
 from MicroTools import unfolder
 
 RHE = False
 GBPC = unfolder.MBtomuB(analysis='1eX_PC', remove_high_energy=RHE, unfold=True)
 GBFC = unfolder.MBtomuB(analysis='1eX', remove_high_energy=RHE, unfold=True)
-from Inclusive_Analysis import muB_NoBkgOsc_Chi2
+from inclusive_osc_tools import muB_NoBkgOsc_Chi2
 
 
-MiniBooNE_Signal_PANM = np.loadtxt(f"{mb_data_osctables}/dm-sin-MB-events-table-less-points.dat")
+MiniBooNE_Signal_PANM = np.loadtxt(f"{MT.mb_data_osctables}/dm-sin-MB-events-table-less-points.dat")
 Result = []
 Pairs = []
 for k0 in range(len(MiniBooNE_Signal_PANM)):
@@ -43,4 +43,4 @@ for k0 in range(len(MiniBooNE_Signal_PANM)):
 
     Result.append([dm41, ssq2thmue, muB_NoBkgOsc_Chi2(uBtemp, constrained=False, Asimov=True), muB_NoBkgOsc_Chi2(uBtemp, constrained=True, Asimov=True), muB_NoBkgOsc_Chi2(uBtemp, constrained=False, Asimov=False)])
 
-np.savetxt(f'{path_osc_data}/Inclusive_NoBkgOsc_Chi2.dat', Result)
+np.savetxt(f'{MT.path_osc_data}/Inclusive_NoBkgOsc_Chi2.dat', Result)

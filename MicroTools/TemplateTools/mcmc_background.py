@@ -2,16 +2,10 @@ import matplotlib
 matplotlib.use('Agg')
 import numpy as np
 import emcee
-import sys
 import tqdm
 import time
-import argparse
-import scipy.stats as stats
 
 from . import miniboone_neutrino_improved_fit as mbfit
-
-
-
 
 SumExcs = 0
 SumOD = 0

@@ -1,26 +1,26 @@
 import numpy as np
 from scipy.linalg import inv
 from scipy.special import sici
-import unfolder
+from .. import unfolder
 
-from MicroTools import * 
+import MicroTools as MT
 
 GBPC_NuE = unfolder.MBtomuB(analysis='1eX_PC', remove_high_energy=False, unfold=False, effNoUnfold=False)
 GBFC_NuE = unfolder.MBtomuB(analysis='1eX', remove_high_energy=False, unfold=False, effNoUnfold=False)
 
 Sets = ["nueCC_FC_", "nueCC_PC_", "numuCC_FC_", "numuCC_PC_", "numuCCpi0_FC_", "numuCCpi0_PC_", "NCpi0_"]
 LEEStr, SigStr, BkgStr, ObsStr = "LEE.npy", "Sig.npy", "Bkg.npy", "Obs.npy"
-LEESets = [np.load(muB_inclusive_datarelease_path+si+LEEStr) for si in Sets]
-SigSets = [np.load(muB_inclusive_datarelease_path+si+SigStr) for si in Sets]
-BkgSets = [np.load(muB_inclusive_datarelease_path+si+BkgStr) for si in Sets]
-ObsSets = [np.load(muB_inclusive_datarelease_path+si+ObsStr) for si in Sets]
+LEESets = [np.load(MT.muB_inclusive_datarelease_path+si+LEEStr) for si in Sets]
+SigSets = [np.load(MT.muB_inclusive_datarelease_path+si+SigStr) for si in Sets]
+BkgSets = [np.load(MT.muB_inclusive_datarelease_path+si+BkgStr) for si in Sets]
+ObsSets = [np.load(MT.muB_inclusive_datarelease_path+si+ObsStr) for si in Sets]
 
 LEESetsF = np.concatenate(LEESets)
 SigSetsF = np.concatenate(SigSets)
 BkgSetsF = np.concatenate(BkgSets)
 ObsSetsF = np.concatenate(ObsSets)
 
-FCov = np.load(muB_inclusive_datarelease_path+"MuBInclusive_FracCov_Square.npy")
+FCov = np.load(MT.muB_inclusive_datarelease_path+"MuBInclusive_FracCov_Square.npy")
 
 SigTypes = ['nue', 'nue', 'numu', 'numu', 'numuPi0', 'numuPi0', 'NCPi0']
 BEdges0 = [0.0 + 0.1*j for j in range(26)]
@@ -33,13 +33,13 @@ LMBT = 0.4685 #Baseline length in kilometers
 
 ###########
 # Numu data
-NuMuCC_TrueEDist_FC = np.loadtxt(f"{muB_inclusive_data_path}/TrueEDist_numuCC_FC.dat")
-NuMuCC_MigMat_FC = np.loadtxt(f"{muB_inclusive_data_path}/MigMat_numuCC_FC.dat")
-NuMuCC_Eff_FC = np.loadtxt(f"{muB_inclusive_data_path}/Efficiency_numuCC_FC.dat")
+NuMuCC_TrueEDist_FC = np.loadtxt(f"{MT.muB_inclusive_data_path}/TrueEDist_numuCC_FC.dat")
+NuMuCC_MigMat_FC = np.loadtxt(f"{MT.muB_inclusive_data_path}/MigMat_numuCC_FC.dat")
+NuMuCC_Eff_FC = np.loadtxt(f"{MT.muB_inclusive_data_path}/Efficiency_numuCC_FC.dat")
 
-NuMuCC_TrueEDist_PC = np.loadtxt(f"{muB_inclusive_data_path}/TrueEDist_numuCC_PC.dat")
-NuMuCC_MigMat_PC = np.loadtxt(f"{muB_inclusive_data_path}/MigMat_numuCC_PC.dat")
-NuMuCC_Eff_PC = np.loadtxt(f"{muB_inclusive_data_path}/Efficiency_numuCC_PC.dat")
+NuMuCC_TrueEDist_PC = np.loadtxt(f"{MT.muB_inclusive_data_path}/TrueEDist_numuCC_PC.dat")
+NuMuCC_MigMat_PC = np.loadtxt(f"{MT.muB_inclusive_data_path}/MigMat_numuCC_PC.dat")
+NuMuCC_Eff_PC = np.loadtxt(f"{MT.muB_inclusive_data_path}/Efficiency_numuCC_PC.dat")
 
 MuB_BinEdges_NuMu = [0.0 + 0.05*j for j in range(61)]
 
@@ -130,7 +130,7 @@ def muB_NoBkgOsc_Chi2(temp, constrained=False, Asimov=False, RemoveOverflow=Fals
 def muB_OscChi2(Ue4sq, Um4sq, dm41, temp, constrained=False, RemoveOverflow=False, sigReps=None, Asimov=False):
     """Calculates the chi-squared from the full covariance matrix,
        allowing for oscillated backgrounds (oscillating as a function of *reconstructed* neutrino energy)
-       
+
        "constrained" is an option of whether to apply the Covariance-Matrix-Constraint method on the nu_e CC fully-contained sample
        Default for our analyses will be "False"
 
@@ -207,7 +207,7 @@ def muB_OscChi2(Ue4sq, Um4sq, dm41, temp, constrained=False, RemoveOverflow=Fals
 
     return TS
 
-MCT = np.load(f"{muB_inclusive_data_path}/MuB_NuE_True.npy")
+MCT = np.load(f"{MT.muB_inclusive_data_path}/MuB_NuE_True.npy")
 MuB_True_BinEdges = [0.200, 0.250, 0.300, 0.350, 0.400, 0.450, 0.500, 0.600, 0.800, 1.000, 1.500, 2.000, 2.500, 3.000]
 
 def MuBNuEDis(dm41, Ue4Sq):

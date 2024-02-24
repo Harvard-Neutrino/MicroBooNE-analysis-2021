@@ -1,17 +1,12 @@
-import matplotlib
 import matplotlib.pyplot as plt
 import corner
 import numpy as np
 import scipy
 import emcee
-import sys
-import tqdm
 import time
 
 from MicroTools import *
 from MicroTools.TemplateTools import miniboone_fit as mbfit
-from MicroTools.InclusiveTools import inclusive
-from MicroTools import unfolder 
 
 NEVENTS_NOMINAL = 360
 

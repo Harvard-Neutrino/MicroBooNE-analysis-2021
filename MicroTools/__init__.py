@@ -2,9 +2,7 @@ import numpy as np
 from pathlib import Path
 local_dir = Path(__file__).parent
 
-
 MeVToGeV = 1.0e-3
-
 
 ################################################################## 
 # main plots folder
